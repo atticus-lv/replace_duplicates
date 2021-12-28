@@ -26,6 +26,8 @@ class ReplaceBase():
     base_names = dict()  # coll of the base name
     replace_dict = dict()  # key: object.name, pointer
 
+    remove: BoolProperty(name='Remove', description='Remove if not set fake user', default=True)
+
     def restore(self):
         self.base_names.clear()
         self.replace_dict.clear()
@@ -52,6 +54,12 @@ class ReplaceBase():
 
         layout = self.layout
         col = layout.column()
+        row = col.row()
+        row.alignment = 'RIGHT'
+        row.separator()
+        row.prop(self,'remove',icon = 'X')
+
+
         for index, item in enumerate(temp_list):
             box = col.box()
             row = box.row()
@@ -110,6 +118,10 @@ class RD_OT_replace_nodegroups(ReplaceBase, bpy.types.Operator):
                         msg = f"Replace object '{node.name}'s nodetree '{old.name}' with '{new_mat.name}'"
                         self.report({"INFO"}, msg)
 
+        if self.remove:
+            for nt in confirm_list:
+                if nt.use_fake_user is False: bpy.data.node_groups.remove(nt)
+
         return {"FINISHED"}
 
 
@@ -155,6 +167,10 @@ class RD_OT_replace_materials(ReplaceBase, bpy.types.Operator):
                     # report
                     msg = f"Replace object '{obj.name}'s material '{old_mat.name}' with '{new_mat.name}'"
                     self.report({"INFO"}, msg)
+
+        if self.remove:
+            for mat in confirm_list:
+                if mat.use_fake_user is False: bpy.data.materials.remove(mat)
 
         return {"FINISHED"}
 
